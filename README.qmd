@@ -10,7 +10,7 @@ title: "changeOD: exploring changes in travel patterns with origin-destination d
 
 ```{r}
 #| eval: false
-
+#| include: false
 usethis::use_r("changeOD")
 usethis::use_description()
 usethis::use_mit_license("Robin Lovelace")
@@ -28,4 +28,13 @@ usethis::use_github_pages()
 usethis::use_github_action("pkgdown")
 # Add badges to README
 usethis::use_github_actions_badge()
+# Add get started vignette
+usethis::use_vignette("changeOD")
+# Add collapse and ggplot2 to Suggests
+usethis::use_package("collapse", "Suggests")
+usethis::use_package("ggplot2", "Suggests")
 ```
+
+To see the set-up of this package, see the [README.qmd](README.qmd) file.
+
+To see basic results, see the [vignette](vignettes/changeOD.Rmd) and the rendered results at [https://robinlovelace.github.io/changeOD/](https://robinlovelace.github.io/changeOD/articles/changeOD.html).
