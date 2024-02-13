@@ -19,4 +19,11 @@ usethis::use_mit_license("Robin Lovelace")
 usethis::use_build_ignore("README.qmd")
 # Use standard R package structure
 usethis::use_package("od")
+# Package website with pkgdown
+usethis::use_pkgdown()
+?usethis::use_pkgdown()
+# With GitHub pages:
+usethis::use_github_pages()
+# pkgdown action:
+usethis::use_github_action("pkgdown")
 ```
