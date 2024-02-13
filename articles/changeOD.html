@@ -73,12 +73,58 @@
 <div class="section level3">
 <h3 id="origin-destination-data">2011 Origin-Destination data<a class="anchor" aria-label="anchor" href="#origin-destination-data"></a>
 </h3>
+<p>2011 data was taken from the open access data provided by the WICID
+service and downloaded with the function <code>get_od</code> from the
+<code>pct</code> package. The data is available at <a href="https://wicid.ukdataservice.ac.uk/flowdata/cider/wicid/downloads.php" class="external-link">WICID</a>
+and is based on the 2011 Census. The data is available at the local
+authority level and includes the following variables (after removing
+unwanted variables):</p>
+<ul>
+<li>
+<code>geo_code1</code>: Origin code</li>
+<li>
+<code>geo_code2</code>: Destination code</li>
+<li>
+<code>from_home</code>: Working from home</li>
+<li>
+<code>light_rail</code>: Underground, metro, light rail, tram</li>
+<li>
+<code>train</code>: Train</li>
+<li>
+<code>bus</code>: Bus</li>
+<li>
+<code>taxi</code>: Taxi</li>
+<li>
+<code>motorbike</code>: Motorcycle, scooter or moped</li>
+<li>
+<code>car_driver</code>: Driving a car or van</li>
+<li>
+<code>car_passenger</code>: Passenger in a car or van</li>
+<li>
+<code>bicycle</code>: Bicycle</li>
+<li>
+<code>foot</code>: On foot</li>
+<li>
+<code>other</code>: Other method of travel to work</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="origin-destination-data-1">2021 Origin-Destination data<a class="anchor" aria-label="anchor" href="#origin-destination-data-1"></a>
 </h3>
 <p>See the data at <a href="https://wicid.ukdataservice.ac.uk/flowdata/cider/wicid/downloads.php" class="external-link">WICID</a>
-(requires login for data with mode).</p>
+(requires login for data with mode). We undertook the following steps to
+process the data:</p>
+<ol style="list-style-type: decimal">
+<li>Download the data from the WICID service.</li>
+<li>Read the data into R.</li>
+<li>Check the structure of the data.</li>
+<li>Check the cross-tabulation of mode</li>
+<li>Aggregate the data by mode of travel and remove unwanted places of
+work.</li>
+<li>Pivot the data wider to match the 2011 dataset.</li>
+<li>Change the names to match the 2011 dataset.</li>
+<li>Compare the 2021 and 2011 datasets.</li>
+</ol>
 </div>
 </div>
 <div class="section level2">
@@ -89,7 +135,7 @@ below.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="right">year</th>
-<th align="right">n</th>
+<th align="right">n_row</th>
 <th align="right">sum</th>
 </tr></thead>
 <tbody>
@@ -101,7 +147,7 @@ below.</p>
 <tr class="even">
 <td align="right">2021</td>
 <td align="right">1851505</td>
-<td align="right">4583443</td>
+<td align="right">27774281</td>
 </tr>
 </tbody>
 </table>
