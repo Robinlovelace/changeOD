@@ -1,11 +1,13 @@
-# changeOD: exploring changes in travel patterns with origin-destination
-data
+# changeOD
 
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/Robinlovelace/changeOD/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Robinlovelace/changeOD/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
+
+This package contains code and example data for exploring changes in
+travel patterns with origin-destination data.
 
 To see the set-up of this package, see the [README.qmd](README.qmd)
 file.
