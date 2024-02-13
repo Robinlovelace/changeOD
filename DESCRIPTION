@@ -1,11 +1,16 @@
 Package: changeOD
-Title: What the Package Does (One Line, Title Case)
+Title: Compare 'OD' Datasets
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Robin", "Lovelace", , "rob00x@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5679-6536"))
+  )
+Description: Compares two 'OD' datasets, e.g. from different years, to
+    identify changes in accessibility over time.
 License: MIT + file LICENSE
+URL: https://github.com/robinlovelace/changeOD,
+    https://robinlovelace.github.io/changeOD/
+BugReports: https://github.com/robinlovelace/changeOD/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
