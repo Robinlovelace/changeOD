@@ -1,0 +1,26 @@
+# changeOD: exploring changes in travel patterns with origin-destination
+data
+
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/Robinlovelace/changeOD/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Robinlovelace/changeOD/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+``` r
+usethis::use_r("changeOD")
+usethis::use_description()
+usethis::use_mit_license("Robin Lovelace")
+?usethis::use_github_action()
+# Ignore README.qmd file with .Rbuildignore
+usethis::use_build_ignore("README.qmd")
+# Use standard R package structure
+usethis::use_package("od")
+# Package website with pkgdown
+usethis::use_pkgdown()
+?usethis::use_pkgdown()
+# With GitHub pages:
+usethis::use_github_pages()
+# pkgdown action:
+usethis::use_github_action("pkgdown")
+```
