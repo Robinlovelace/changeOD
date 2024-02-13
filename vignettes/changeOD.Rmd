@@ -16,8 +16,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, eval=TRUE}
 library(collapse)
+library(ggplot2)
 ```
 
 # Introduction
@@ -55,12 +56,16 @@ names(od)
 # [13] "foot"          "other"         "geo_name1"     "geo_name2"
 # [17] "la_1"          "la_2"
 # Remove unwanted variables with fselect:
+od_2011_minimal = od |>
+  fselect(geo_code1, geo_code2, all)
+arrow::write_parquet(od_2011_minimal, "od_2011_minimal.parquet")
 od = od |>
   fselect(-la_1, -la_2, -geo_name1, -geo_name2, -all, -from_home)
 # Save as arrow file:
 arrow::write_parquet(od, "od_2011.parquet")
 # Upload to GitHub with piggyback:
 piggyback::pb_upload("od_2011.parquet")
+piggyback::pb_upload("od_2011_minimal.parquet")
 ```
 
 ```{r}
@@ -74,6 +79,50 @@ od_2011 = arrow::read_parquet("od_2011.parquet")
 ## 2021 Origin-Destination data
 
 See the data at [WICID](https://wicid.ukdataservice.ac.uk/flowdata/cider/wicid/downloads.php) (requires login for data with mode).
+
+The open access OD data can be obtained as follows from this link: [WICID](https://wicid.ukdataservice.ac.uk/cider/wicid/downloads.php#).
+
+```{r, eval=FALSE}
+od_2021_open_raw = readr::read_csv("ODWP12EW_MSOA_v1.zip")
+names(od_2021_open_raw)
+# [1] "Middle layer Super Output Areas code"        
+# [2] "Middle layer Super Output Areas label"       
+# [3] "MSOA of workplace code"                      
+# [4] "MSOA of workplace label"                     
+# [5] "Hours worked (5 categories) code"            
+# [6] "Hours worked (5 categories) label"           
+# [7] "Place of work indicator (4 categories) code" 
+# [8] "Place of work indicator (4 categories) label"
+# [9] "Count"  
+# Table of place of work indicator:
+table(
+  od_2021_open_raw$`Place of work indicator (4 categories) label`
+)
+# Pivot wider and create new 'all' column:
+od_2021_open = od_2021_open_raw |>
+  subset(
+    `Place of work indicator (4 categories) label` == "Working in the UK but not working at or from home" |
+    `Place of work indicator (4 categories) label` == "Mainly working at or from home" |
+    `Place of work indicator (4 categories) label` == "Other (including offshore installation, working outside the UK)"
+  ) |>
+  fgroup_by(
+    `Middle layer Super Output Areas code`,
+    `MSOA of workplace code`
+  ) |>
+  fsummarise(all = sum(Count))
+names(od_2021_open) = c(
+  "geo_code1",
+  "geo_code2",
+  "all"
+)
+sum(od_2021_open$all)
+# 15 million trips
+# Save as arrow file:
+arrow::write_parquet(od_2021_open, "od_2021_open.parquet")
+# Upload the file:
+piggyback::pb_upload("od_2021_open.parquet")
+```
+
 We undertook the following steps to process the data:
 
 1. Download the data from the WICID service.
@@ -256,3 +305,56 @@ od_summary = data.frame(
 | 2011| 2402201| 26681568|
 | 2021| 1851505| 27774281|
 
+The change from 2011 to 2021 is shown in the figure below
+
+```{r}
+od_mode_sums = od_combined |>
+  fgroup_by(year) |>
+  fsummarise(across(-c(year, geo_code1, geo_code2), sum)) |>
+  pivot("year") |>
+  # Mutate names to be in title case, e.g. car_driver -> Car driver
+  fmutate(variable = tools::toTitleCase((as.character(variable)))) |>
+  # Replace _ with space
+  fmutate(variable = gsub("_", " ", variable))
+# Manually set order of modes:
+# new_levels = c()
+names(od_mode_sums) = c("year", "Mode", "Number of trips")
+# Save as arrow file:
+arrow::write_parquet(od_mode_sums, "od_mode_sums.parquet")
+piggyback::pb_upload("od_mode_sums.parquet")
+# get url:
+```
+
+```{r, eval=TRUE}
+u = "https://github.com/Robinlovelace/changeOD/releases/download/latest/od_mode_sums.parquet"
+od_mode_sums = arrow::read_parquet(u)
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r, eval=TRUE}
+# Plot in bar chart:
+od_mode_sums |>
+  ggplot(
+    aes(x = Mode, y = `Number of trips`, fill = factor(year))
+  ) +
+  geom_col(position = "dodge") +
+  theme_minimal() +
+  # Human readable y axis labels:
+  scale_y_continuous(
+    labels = scales::comma
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(
+    x = "Mode of travel",
+    y = "Number of trips",
+    fill = "Year"
+  )
+```

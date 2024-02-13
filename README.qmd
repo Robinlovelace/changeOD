@@ -35,6 +35,8 @@ usethis::use_vignette("changeOD")
 # Add collapse and ggplot2 to Suggests
 usethis::use_package("collapse", "Suggests")
 usethis::use_package("ggplot2", "Suggests")
+# Add arrow:
+usethis::use_package("arrow", "Suggests")
 ```
 
 To see the set-up of this package, see the [README.qmd](README.qmd) file.

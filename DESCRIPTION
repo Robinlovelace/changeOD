@@ -17,6 +17,7 @@ RoxygenNote: 7.2.3
 Imports: 
     od
 Suggests: 
+    arrow,
     collapse,
     ggplot2,
     knitr,
