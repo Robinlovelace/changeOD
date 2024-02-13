@@ -24,6 +24,22 @@ library(collapse)
 
 ## 2011 Origin-Destination data
 
+2011 data was taken from the open access data provided by the WICID service and downloaded with the function `get_od` from the `pct` package. The data is available at [WICID](https://wicid.ukdataservice.ac.uk/flowdata/cider/wicid/downloads.php) and is based on the 2011 Census. The data is available at the local authority level and includes the following variables (after removing unwanted variables):
+
+- `geo_code1`: Origin code
+- `geo_code2`: Destination code
+- `from_home`: Working from home
+- `light_rail`: Underground, metro, light rail, tram
+- `train`: Train
+- `bus`: Bus
+- `taxi`: Taxi
+- `motorbike`: Motorcycle, scooter or moped
+- `car_driver`: Driving a car or van
+- `car_passenger`: Passenger in a car or van
+- `bicycle`: Bicycle
+- `foot`: On foot
+- `other`: Other method of travel to work
+
 ```{r, eval=FALSE}
 od = pct::get_od()
 names(od)
@@ -34,7 +50,7 @@ names(od)
 # [17] "la_1"          "la_2"
 # Remove unwanted variables with fselect:
 od = od |>
-  fselect(-la_1, -la_2, -geo_name1, -geo_name2, -all)
+  fselect(-la_1, -la_2, -geo_name1, -geo_name2, -all, -from_home)
 # Save as arrow file:
 arrow::write_parquet(od, "od_2011.parquet")
 # Upload to GitHub with piggyback:
@@ -52,6 +68,16 @@ od_2011 = arrow::read_parquet("od_2011.parquet")
 ## 2021 Origin-Destination data
 
 See the data at [WICID](https://wicid.ukdataservice.ac.uk/flowdata/cider/wicid/downloads.php) (requires login for data with mode).
+We undertook the following steps to process the data:
+
+1. Download the data from the WICID service.
+2. Read the data into R.
+3. Check the structure of the data.
+4. Check the cross-tabulation of mode
+5. Aggregate the data by mode of travel and remove unwanted places of work.
+6. Pivot the data wider to match the 2011 dataset.
+7. Change the names to match the 2011 dataset.
+8. Compare the 2021 and 2011 datasets.
 
 ```{r, eval=FALSE}
 list.files(pattern = "zip")
@@ -71,8 +97,58 @@ names(od_2022_raw)
 # [11] "Place of work indicator (4 categories) code"
 # [12] "Place of work indicator (4 categories) label"
 # [13] "Count"
+# Check cross-tabulation of mode of travel with Sex:
+table(
+  od_2022_raw$`Method used to travel to workplace (12 categories) label`,
+  od_2022_raw$`Sex (2 categories) label`
+)
+# And Age:
+table(
+  od_2022_raw$`Method used to travel to workplace (12 categories) label`,
+  od_2022_raw$`Age (E) (8 categories) label`
+)
+# Age and sex:
+table(
+  od_2022_raw$`Age (E) (8 categories) label`,
+  od_2022_raw$`Sex (2 categories) label`
+)
+# Just place of work:
+table(
+  od_2022_raw$`Place of work indicator (4 categories) label`
+)
+
+
+#                                                  Does not apply 
+#                                                           87168 
+#                  Mainly working at or from home, No fixed place 
+#                                                          510823 
+# Other (including offshore installation, working outside the UK) 
+#                                                           66219 
+#               Working in the UK but not working at or from home 
+#                                                         7097394 
+# And all 4:
+table(
+  od_2022_raw$`Method used to travel to workplace (12 categories) label`,
+  od_2022_raw$`Sex (2 categories) label`,
+  od_2022_raw$`Age (E) (8 categories) label`,
+  od_2022_raw$`Place of work indicator (4 categories) label`
+)
+sum(od_2022_raw$Count)
+# Aggregating by mode of travel after removing unwanted places of work:
+od_2022_aggregated = od_2022_raw |>
+  # subset(
+  #   `Place of work indicator (4 categories) label` == "Working in the UK but not working at or from home" |
+  #   `Place of work indicator (4 categories) label` == "Mainly working at or from home, No fixed place"
+  #   ) |>
+  fgroup_by(
+    `Middle layer Super Output Areas code`,
+    `MSOA of workplace code`,
+    `Method used to travel to workplace (12 categories) label`
+  ) |>
+  fsummarise(Count = sum(Count))
 # Pivot wider keeping only MSOA code (geo_code new name) and mode of travel (mode new name):
-od_2022_by_mode = od_2022_raw |>
+# od_2022_by_mode = od_2022_raw |> # generates incorrect results
+od_2022_by_mode = od_2022_aggregated |>
   pivot(
     id = c(
       "Middle layer Super Output Areas code",
@@ -83,37 +159,37 @@ od_2022_by_mode = od_2022_raw |>
     how = "wider"
   )
 names(od_2022_by_mode)
-#  [1] "Middle layer Super Output Areas code"
-#  [2] "MSOA of workplace code"
+#  [1] "Middle layer Super Output Areas code"        
+#  [2] "MSOA of workplace code"                      
 #  [3] "Not in employment or aged 15 years and under"
-#  [4] "Underground, metro, light rail, tram"
-#  [5] "Train"
-#  [6] "Bus, minibus or coach"
-#  [7] "Taxi"
-#  [8] "Driving a car or van"
-#  [9] "Passenger in a car or van"
-# [10] "Bicycle"
-# [11] "On foot"
-# [12] "Other method of travel to work"
-# [13] "Work mainly at or from home"
-# [14] "Motorcycle, scooter or moped"
+#  [4] "Bicycle"                                     
+#  [5] "Bus, minibus or coach"                       
+#  [6] "Driving a car or van"                        
+#  [7] "On foot"                                     
+#  [8] "Other method of travel to work"              
+#  [9] "Passenger in a car or van"                   
+# [10] "Taxi"                                        
+# [11] "Train"                                       
+# [12] "Underground, metro, light rail, tram"        
+# [13] "Motorcycle, scooter or moped"                
+# [14] "Work mainly at or from home"            
 
 # Change names to match 2011 dataset:
 names(od_2022_by_mode) = c(
   "geo_code1",
   "geo_code2",
-  "not_in_employment_or_aged_15_years_and_under",
-  "light_rail",
-  "train",
+  "not_in_employment",
+  "bicycle",
   "bus",
-  "taxi",
   "car_driver",
-  "car_passenger",
-  "bicycle", # 10
   "foot",
   "other",
-  "from_home",
-  "motorbike"
+  "car_passenger",
+  "taxi",
+  "train",
+  "light_rail",
+  "motorbike",
+  "from_home"
 )
 ncol(od_2022_by_mode)
 ncol(od_2011)
@@ -123,7 +199,13 @@ od_2021 = od_2022_by_mode[names(od_2011)]
 od_2021[is.na(od_2021)] = 0
 # Compare working from home numbers:
 sum(od_2011$from_home)
-sum(od_2021$from_home)
+sum(od_2021$from_home) # ~4 x more people working from home
+# Driving:
+sum(od_2011$car_driver)
+sum(od_2021$car_driver)
+# Walking:
+sum(od_2011$foot)
+sum(od_2021$foot)
 # Save as arrow file:
 arrow::write_parquet(od_2021, "od_2021.parquet")
 ```
@@ -138,7 +220,7 @@ cor(
   colMeans(od_2011[-(1:2)], na.rm = TRUE),
   colMeans(od_2021[-(1:2)], na.rm = TRUE)
 )
-# [1] 0.99027
+# [1] 0.8809119
 # Save as combined dataset:
 od_combined = rowbind(
   od_2011 |> fmutate(year = 2011),
@@ -156,15 +238,15 @@ Basic info on the 2011 and 2021 datasets are presented in the table below.
 od_combined = arrow::read_parquet("od_combined.parquet")
 od_summary = data.frame(
   year = c(2011, 2021),
-  n = c(nrow(od_2011), nrow(od_2021)),
+  n_row = c(nrow(od_2011), nrow(od_2021)),
   sum = c(sum(od_2011[-(1:2)]), sum(od_2021[-(1:2)]))
 )
 # od_summary |>
 #   knitr::kable()
-
 ```
 
-| year|       n|      sum|
+| year|   n_row|      sum|
 |----:|-------:|--------:|
 | 2011| 2402201| 26681568|
-| 2021| 1851505|  4583443|
+| 2021| 1851505| 27774281|
+
