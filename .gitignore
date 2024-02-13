@@ -1,1 +1,5 @@
 docs
+inst/doc
+*.parquet
+*.zip
+*.html
