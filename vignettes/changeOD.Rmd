@@ -20,6 +20,12 @@ knitr::opts_chunk$set(
 library(collapse)
 ```
 
+# Introduction
+
+This document provides an introduction to 2011 and 2021 OD data and how they can be compared to explore changes in travel patterns in relation to particular corridors affected by new interventions.
+
+The reproducible source code underlying this document can be found at [github.com/robinlovelace/changeOD](https://github.com/robinlovelace/changeOD/blob/main/vignettes/changeOD.Rmd).
+
 # Datasets
 
 ## 2011 Origin-Destination data
